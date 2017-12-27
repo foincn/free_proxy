@@ -104,11 +104,16 @@ def add_task(type, ip, port):
 
 def test_ip(type, ip, port):
     proxy = {type: "%s://%s:%s" %(type, ip, port)}
-    try:
-        r = requests.get('http://ip.cn', proxies=proxy, timeout=3)
-    except:
-        print('%s无法连接！' % ip)
-    else:
+    count = 0
+    for i in range(3):
+        try:
+            r = s.get('http://ip.cn', proxies=proxy, timeout=2)
+        except:
+            print('%s无法连接！' % ip)
+            break
+        else:
+            count += 1
+    if count == 3:
         if r.status_code == 200:
             print('%s加入列表！' % ip)
             ip_list.append((type, ip, port))
@@ -122,3 +127,8 @@ get_kunpeng()
 
 http://www.goubanjia.com/free/isp/%E7%A7%BB%E5%8A%A8/index1.shtml
 http://www.kuaidaili.com/free/
+
+a = list(ip_list)
+ip_list = []
+for i in a:
+    add_task(i[0], i[1], i[2])
