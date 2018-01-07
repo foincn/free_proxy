@@ -23,16 +23,16 @@ def test_ip(type, ip, port):
         try:
             r = s.get(test_url, proxies=proxy, timeout=1)
             if r.text == myip:
-                print('透明代理%s' % ip)
+                #print('透明代理%s' % ip)
                 break
         except:
-            print('%s无法连接！' % ip)
+            #print('%s无法连接！' % ip)
             break
         else:
             count += 1
     if count == 3:
         if r.status_code == 200:
-            print('%s加入列表！' % ip)
+            #print('%s加入列表！' % ip)
             ip_list.append((type, ip, port))
 
 
@@ -87,14 +87,15 @@ def sslproxies_info(source):
 
 
 
-
-
-
-
 threads = []
 ip_list = []
 get_hidemy()
 get_sslproxies()
+for t in threads:
+    t.join()
+
+if __name__ != '__main__':
+    print('成功载入%s个代理到 ip_list' % len(ip_list))
 
 
 
