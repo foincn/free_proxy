@@ -67,9 +67,34 @@ def hidemy_info(source):
     type = 'http'
     return(type, ip, port)
 
+#################################
+# sslproxies
+def get_sslproxies():
+    url = 'https://www.sslproxies.org/'
+    r = s.get(url)
+    html = r.content
+    soup = BeautifulSoup(html, "html.parser")
+    sources = soup.select('tbody > tr')
+    for i in sources:
+        ip_info = sslproxies_info(i)
+        add_task(ip_info[0], ip_info[1], ip_info[2])
+
+def sslproxies_info(source):
+    ip = source.select('td')[0].text
+    port = source.select('td')[1].text
+    type = 'http'
+    return(type, ip, port)
+
+
+
+
+
+
+
 threads = []
 ip_list = []
 get_hidemy()
+get_sslproxies()
 
 
 
