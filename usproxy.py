@@ -1,12 +1,16 @@
-#
+#!/usr/bin/python3
+# -*- coding: UTF-8 -*- 
 
 import requests
 from bs4 import BeautifulSoup
 from ghost import Ghost, Session
 import threading
+import time
 
 ##################################################
 
+if __name__ != '__main__':
+    print('正在载入代理 proxypool')
 
 # 测试并加入ip_list
 def add_task(type, ip, port):
@@ -35,8 +39,10 @@ def test_ip(type, ip, port):
             #print('%s加入列表！' % ip)
             ip_list.append((type, ip, port))
 
+##########################################
 
 
+##########################################
 UA = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
 header = {'User-Agent':UA,
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -68,6 +74,20 @@ def hidemy_info(source):
     return(type, ip, port)
 
 #################################
+def load_proxy():
+    global proxypool
+    proxypool = []
+    for i in ip_list:
+        key = i[0]
+        value = "%s://%s:%s" %(i[0], i[1], i[2])
+        proxy = {key: value}
+        proxypool.append(proxy)
+    if len(proxypool) < 5:
+        print('代理数量不足，还剩%s个代理' % len(proxypool))
+    else:
+        print('proxypool已更新%s个代理' % len(proxypool))
+
+#################################
 # sslproxies
 def get_sslproxies():
     url = 'https://www.sslproxies.org/'
@@ -85,21 +105,33 @@ def sslproxies_info(source):
     type = 'http'
     return(type, ip, port)
 
+#################################
+
+def get_proxy_m():
+    global threads
+    global ip_list
+    threads = []
+    ip_list = []
+    #get_hidemy()
+    get_sslproxies()
+    for t in threads:
+        t.join()
+    load_proxy()
 
 
-threads = []
-ip_list = []
-get_hidemy()
-get_sslproxies()
-for t in threads:
-    t.join()
+def get_proxy_p():
+    global ip_list
+    while True:
+        time.sleep(600)
+        ip_list = []
+        #get_hidemy()
+        get_sslproxies()
+        for t in threads:
+            t.join()
+        load_proxy()
 
-if __name__ != '__main__':
-    print('成功载入%s个代理到 ip_list' % len(ip_list))
+def get_proxy():
+    get_proxy_m()
+    threading.Thread(target=get_proxy_p, args=()).start()
 
-
-
-s = requests.session()
-r = s.get(url, headers=header)
-html = r.content
-soup = BeautifulSoup(html, "html.parser")
+get_proxy()
